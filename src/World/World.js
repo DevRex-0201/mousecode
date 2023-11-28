@@ -6,63 +6,63 @@ import { createControls } from './systems/controls.js';
 import { createRenderer } from './systems/renderer.js';
 import { Resizer } from './systems/Resizer.js';
 import { Loop } from './systems/Loop.js';
-import { Scene,BackSide, SkeletonHelper, MeshBasicMaterial, Group, SkinnedMesh, Skeleton,Vector3,Vector4,Matrix4,Matrix3 } from 'https://cdn.skypack.dev/three@v0.132.2';
-import { OBJExporter} from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/OBJExporter.js';
-import { GLTFExporter} from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/GLTFExporter.js';
+import { Scene, BackSide, SkeletonHelper, MeshBasicMaterial, Group, SkinnedMesh, Skeleton, Vector3, Vector4, Matrix4, Matrix3 } from 'https://cdn.skypack.dev/three@v0.132.2';
+import { OBJExporter } from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/OBJExporter.js';
+import { GLTFExporter } from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/GLTFExporter.js';
 
 
 let bonenames = [
-  "c_pelvis01_jj_01", 
-"c_tail03_jj_03", 
-"c_tail04_jj_04", 
-"c_tail05_jj_05", 
-"c_tail06_jj_06", 
-"c_tail07_jj_07", 
-"c_tail08_jj_08", 
-"c_tail09_jj_09", 
-"c_tail10_jj_010", 
-"c_tail11_jj_011", 
-"c_tail12_jj_012", 
-"c_tail13_jj_013", 
-"c_tail14_jj_014", 
-"c_tail15_jj_015", 
-"c_tail16_jj_016", 
-"c_tail17_jj_017", 
-"c_tail18_jj_018", 
-"c_tail19_jj_019", 
-"c_tail20_jj_020", 
-"c_tail21_jj_021", 
-"c_tail22_jj_022", 
-"c_tail23_jj_023", 
-"c_spine01_jj_024", 
-"c_spine02_jj_025", 
-"organ_protect_L_2_099", 
-"c_spine03_jj_026", 
-"organ_protect_L_096", 
-"organ_protect_S_097", 
-"c_spine04_jj_027", 
-"organ_protect_2_094", 
-"c_spine05_jj_028", 
-"c_neck01_jj_029", 
-"c_head01_jj_030", 
-"l_ear01_jj_033", 
-"r_ear01_jj_036", 
-"l_eye01_jj_039", 
-"r_eye01_jj_040", 
-"organ_protect_1_L_041", 
-"organ_protect_1_R_042", 
-"l_scapula01_jj_043", 
-"l_humerus01_jj_044", 
-"l_metacarpus01_jj_046", 
-"r_scapula01_jj_066", 
-"r_humerus01_jj_067", 
-"r_metacarpus01_jj_069", 
-"organ_protect_B_L_089", 
-"organ_protect_B_R_091", 
-"l_femur01_jj_0100", 
-"l_metatarsus01_jj_0101", 
-"r_femur01_jj_0123", 
-"r_metatarsus01_jj_0125"
+  "c_pelvis01_jj_01",
+  "c_tail03_jj_03",
+  "c_tail04_jj_04",
+  "c_tail05_jj_05",
+  "c_tail06_jj_06",
+  "c_tail07_jj_07",
+  "c_tail08_jj_08",
+  "c_tail09_jj_09",
+  "c_tail10_jj_010",
+  "c_tail11_jj_011",
+  "c_tail12_jj_012",
+  "c_tail13_jj_013",
+  "c_tail14_jj_014",
+  "c_tail15_jj_015",
+  "c_tail16_jj_016",
+  "c_tail17_jj_017",
+  "c_tail18_jj_018",
+  "c_tail19_jj_019",
+  "c_tail20_jj_020",
+  "c_tail21_jj_021",
+  "c_tail22_jj_022",
+  "c_tail23_jj_023",
+  "c_spine01_jj_024",
+  "c_spine02_jj_025",
+  "organ_protect_L_2_099",
+  "c_spine03_jj_026",
+  "organ_protect_L_096",
+  "organ_protect_S_097",
+  "c_spine04_jj_027",
+  "organ_protect_2_094",
+  "c_spine05_jj_028",
+  "c_neck01_jj_029",
+  "c_head01_jj_030",
+  "l_ear01_jj_033",
+  "r_ear01_jj_036",
+  "l_eye01_jj_039",
+  "r_eye01_jj_040",
+  "organ_protect_1_L_041",
+  "organ_protect_1_R_042",
+  "l_scapula01_jj_043",
+  "l_humerus01_jj_044",
+  "l_metacarpus01_jj_046",
+  "r_scapula01_jj_066",
+  "r_humerus01_jj_067",
+  "r_metacarpus01_jj_069",
+  "organ_protect_B_L_089",
+  "organ_protect_B_R_091",
+  "l_femur01_jj_0100",
+  "l_metatarsus01_jj_0101",
+  "r_femur01_jj_0123",
+  "r_metatarsus01_jj_0125"
 ]
 
 let camera;
@@ -84,7 +84,7 @@ let inputRz;
 class World {
   constructor(container) {
     camera = createCamera();
-    renderer = createRenderer(); 
+    renderer = createRenderer();
     scene = createScene();
     loop = new Loop(camera, scene, renderer);
     container.append(renderer.domElement);
@@ -96,16 +96,16 @@ class World {
     let self = this;
   }
 
-  async init() {    
+  async init() {
 
-    const {modelData} = await loadModel('/assets/models/scene.gltf');
-  
+    const { modelData } = await loadModel('/assets/models/scene.gltf');
+
     const material = new MeshBasicMaterial({
       color: 0xff0000
     });
 
     let boneStructure;
-    
+
     let helper;
     let bonesinittemp = []
     let bonestemp = []
@@ -114,32 +114,31 @@ class World {
     let blend_shapes = []
     model.rotation.set(0, 0, 0);
     controls.target.copy(model.rotation);
-    model.scale.set( 0.1, 0.1, 0.1 );    
+    model.scale.set(0.1, 0.1, 0.1);
     scene.add(model);
-    model.traverse((child)=>{
-      if( child.material ) {
+    model.traverse((child) => {
+      if (child.material) {
         child.material.side = BackSide;
       }
-      if(child.morphTargetDictionary )
-      {
+      if (child.morphTargetDictionary) {
         blend_meshes.push(child.name)
       }
-      
+
     })
     boneStructure = scene.getObjectByProperty('type', "Bone");
-    boneStructure.traverse((child) =>{
-        bonestemp.push(child)
+    boneStructure.traverse((child) => {
+      bonestemp.push(child)
     });
-    
-    for(let i=0; i < bonestemp.length; i++){
-      if(bonenames.includes(bonestemp[i].name)){
-        
+
+    for (let i = 0; i < bonestemp.length; i++) {
+      if (bonenames.includes(bonestemp[i].name)) {
+
         bones.push(bonestemp[i]);
       }
     }
 
     console.log(bones)
-    document.getElementById("joint-container").innerHTML = (bones.map((bone,index)=>(
+    document.getElementById("joint-container").innerHTML = (bones.map((bone, index) => (
       `<div class="joint-card">
           <div class="joint-title">${bone.name}</div>
           <div class="joint-input">
@@ -168,17 +167,17 @@ class World {
           </div>
       </div>`
     )).join(" "));
-    
 
-    
-    for(let i=0; i<blend_meshes.length; i++){
+
+
+    for (let i = 0; i < blend_meshes.length; i++) {
       let blend_model = scene.getObjectByName(blend_meshes[i]);
-      let blend = Object.keys( blend_model.morphTargetDictionary);
-      for ( let j = 0; j < blend.length; j ++ ) {
-        blend_shapes.push( {mesh_name:blend_meshes[i], blend_value : blend_model.morphTargetInfluences[j], index:j});
+      let blend = Object.keys(blend_model.morphTargetDictionary);
+      for (let j = 0; j < blend.length; j++) {
+        blend_shapes.push({ mesh_name: blend_meshes[i], blend_value: blend_model.morphTargetInfluences[j], index: j });
       }
     }
-    
+
     document.getElementById("slider-container").innerHTML = (blend_shapes.map((blend) => (
       `
         <div class="blend-shape" style="height: auto; position: relative; display: flex; align-items: center; margin-bottom: 15px; color: white;">
@@ -195,7 +194,7 @@ class World {
     inputRy = document.getElementsByClassName("joint-input-RY");
     inputRz = document.getElementsByClassName("joint-input-RZ");
     let inputLen = inputx.length;
-    for(let i=0; i < inputLen; i++) {
+    for (let i = 0; i < inputLen; i++) {
       inputx[i].addEventListener("change", () => {
         bones[i].position.setX(parseFloat(inputx[i].value));
         bones[i].position.needsUpdate = true;
@@ -227,32 +226,61 @@ class World {
     }
 
 
-   
+
     document.getElementById("export-btn").addEventListener("click", function () {
-      const exporter = new OBJExporter();
-      
+      // Iterate through bones and update positions/rotations based on user input
+      for (let i = 0; i < inputLen; i++) {
+        bones[i].position.setX(parseFloat(inputx[i].value));
+        bones[i].position.setY(parseFloat(inputy[i].value));
+        bones[i].position.setZ(parseFloat(inputz[i].value));
+        bones[i].rotation.x = parseFloat(inputRx[i].value);
+        bones[i].rotation.y = parseFloat(inputRy[i].value);
+        bones[i].rotation.z = parseFloat(inputRz[i].value);
+      }
+
+      // Apply bone transformations to the skinned mesh before exporting
+      scene.traverse(function (object) {
+        if (!object.isSkinnedMesh) return;
+
+        var positionAttribute = object.geometry.getAttribute('position');
+        var normalAttribute = object.geometry.getAttribute('normal');
+        var v1 = new Vector3();
+
+        for (var j = 0; j < positionAttribute.count; j++) {
+          object.boneTransform(j, v1);
+          positionAttribute.setXYZ(j, v1.x, v1.y, v1.z);
+          /*  getBoneNormalTransform.call(object, j, v1); */
+          normalAttribute.setXYZ(j, v1.x, v1.y, v1.z);
+        }
+
+        positionAttribute.needsUpdate = true;
+        normalAttribute.needsUpdate = true;
+      });
+
+      // Create a new OBJExporter
+      var exporter = new OBJExporter();
+
+      // Export the updated scene
       const result = exporter.parse(scene);
-      console.log(scene);
       const blob = new Blob([result], { type: "text/plain" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "exported_model.obj";
       link.click();
     });
-
   }
 
   render() {
     controls.update();
-    for(let i = 0; i<inputx.length; i++ ){
+    for (let i = 0; i < inputx.length; i++) {
       inputx[i].value = parseFloat(bones[i].rotation.x - rotations[i][0]).toFixed(2);
       inputy[i].value = parseFloat(bones[i].rotation.y - rotations[i][1]).toFixed(2);
       inputz[i].value = parseFloat(bones[i].rotation.z - rotations[i][2]).toFixed(2);
     }
-    renderer.render( scene, camera );
+    renderer.render(scene, camera);
   }
 
-  start(){
+  start() {
     loop.start()
   }
 
