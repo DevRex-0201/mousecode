@@ -98,7 +98,7 @@ class World {
 
   async init() {    
 
-    const {modelData} = await loadModel('/mouse/assets/models/scene.gltf');
+    const {modelData} = await loadModel('/assets/models/scene.gltf');
   
     const material = new MeshBasicMaterial({
       color: 0xff0000
