@@ -239,17 +239,7 @@ class World {
 
 
 
-    document.getElementById("export-btn").addEventListener("click", function () {
-      // Iterate through bones and update positions/rotations based on user input
-      for (let i = 0; i < inputLen; i++) {
-        bones[i].position.setX(parseFloat(inputx[i].value));
-        bones[i].position.setY(parseFloat(inputy[i].value));
-        bones[i].position.setZ(parseFloat(inputz[i].value));
-        bones[i].rotation.x = parseFloat(inputRx[i].value);
-        bones[i].rotation.y = parseFloat(inputRy[i].value);
-        bones[i].rotation.z = parseFloat(inputRz[i].value);
-      }
-    
+    document.getElementById("export-btn").addEventListener("click", function () {  
       // Apply bone transformations to the skinned mesh before exporting
       scene.traverse(function (object) {
         if (!object.isSkinnedMesh) return;
