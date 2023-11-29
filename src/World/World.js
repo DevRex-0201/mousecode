@@ -71,6 +71,7 @@ let renderer;
 let scene;
 let loop;
 let bones = [];
+let tem_bones = [];
 let rotations = [];
 let positions = [];
 let inputx;
@@ -98,7 +99,7 @@ class World {
 
   async init() {
 
-    const { modelData } = await loadModel('/assets/models/scene.gltf');
+    const { modelData } = await loadModel('/final/assets/models/scene.gltf');
 
     const material = new MeshBasicMaterial({
       color: 0xff0000
@@ -137,38 +138,40 @@ class World {
       }
     }
 
-    console.log(bones)
-    document.getElementById("joint-container").innerHTML = (bones.map((bone, index) => (
-      `<div class="joint-card">
+  /*   console.log("first")
+    console.log(bones) */
+    document.getElementById("joint-container").innerHTML = (bones.map((bone, index) => {
+      positions.push({x: 0, y: 0, z: 0});
+      rotations.push({x: 0, y: 0, z: 0});
+
+      return `<div class="joint-card">
           <div class="joint-title">${bone.name}</div>
           <div class="joint-input">
               <div class="label" for="">PX</div>
-              <input class="joint-input-X" type="number" step="0.05" placeholder="" value=${bone.position.x}>
+              <input class="joint-input-X" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">PY</div>
-              <input class="joint-input-Y" type="number" step="0.05" placeholder="" value=${bone.position.y}>
+              <input class="joint-input-Y" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">PZ</div>
-              <input class="joint-input-Z" type="number" step="0.05" placeholder="" value=${bone.position.z}>
+              <input class="joint-input-Z" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">RX</div>
-              <input class="joint-input-RX" type="number" step="0.05" placeholder="" value=${bone.rotation.x}>
+              <input class="joint-input-RX" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">RY</div>
-              <input class="joint-input-RY" type="number" step="0.05" placeholder="" value=${bone.rotation.y}>
+              <input class="joint-input-RY" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">RZ</div>
-              <input class="joint-input-RZ" type="number" step="0.05" placeholder="" value=${bone.rotation.z}>
+              <input class="joint-input-RZ" type="number" step="0.05" placeholder="" value=0>
           </div>
       </div>`
-    )).join(" "));
-
-
+    }).join(" "));
 
     for (let i = 0; i < blend_meshes.length; i++) {
       let blend_model = scene.getObjectByName(blend_meshes[i]);
@@ -177,6 +180,8 @@ class World {
         blend_shapes.push({ mesh_name: blend_meshes[i], blend_value: blend_model.morphTargetInfluences[j], index: j });
       }
     }
+
+
 
     document.getElementById("slider-container").innerHTML = (blend_shapes.map((blend) => (
       `
@@ -193,34 +198,41 @@ class World {
     inputRx = document.getElementsByClassName("joint-input-RX");
     inputRy = document.getElementsByClassName("joint-input-RY");
     inputRz = document.getElementsByClassName("joint-input-RZ");
+    
     let inputLen = inputx.length;
     for (let i = 0; i < inputLen; i++) {
       inputx[i].addEventListener("change", () => {
-        bones[i].position.setX(parseFloat(inputx[i].value));
+        bones[i].position.setX(parseFloat(bones[i].position.x + (inputx[i].value - positions[i].x)));
+        positions[i].x = inputx[i].value;        
         bones[i].position.needsUpdate = true;
       })
 
       inputy[i].addEventListener("change", () => {
-        bones[i].position.setY(parseFloat(inputy[i].value));
+        bones[i].position.setY(parseFloat(bones[i].position.y + (inputy[i].value - positions[i].y)));
+        positions[i].y = inputy[i].value;        
         bones[i].position.needsUpdate = true;
       })
 
       inputz[i].addEventListener("change", () => {
-        bones[i].position.setZ(parseFloat(inputz[i].value));
+        bones[i].position.setZ(parseFloat(bones[i].position.z + (inputz[i].value - positions[i].z)));
+        positions[i].z = inputz[i].value;        
         bones[i].position.needsUpdate = true;
       })
       inputRx[i].addEventListener("change", () => {
-        bones[i].rotation.x = parseFloat(inputRx[i].value);
+        bones[i].rotation.x = parseFloat(parseFloat(bones[i].rotation.x + (inputRx[i].value - rotations[i].x)));
+        rotations[i].x = inputRx[i].value;
         bones[i].rotation.needsUpdate = true;
       })
 
       inputRy[i].addEventListener("change", () => {
-        bones[i].rotation.y = parseFloat(inputRy[i].value);
+        bones[i].rotation.y = parseFloat(parseFloat(bones[i].rotation.y + (inputRy[i].value - rotations[i].y)));
+        rotations[i].y = inputRy[i].value;
         bones[i].rotation.needsUpdate = true;
       })
 
       inputRz[i].addEventListener("change", () => {
-        bones[i].rotation.z = parseFloat(inputRz[i].value);
+        bones[i].rotation.z = parseFloat(parseFloat(bones[i].rotation.z + (inputRz[i].value - rotations[i].z)));
+        rotations[i].z = inputRz[i].value;
         bones[i].rotation.needsUpdate = true;
       })
     }
@@ -237,29 +249,29 @@ class World {
         bones[i].rotation.y = parseFloat(inputRy[i].value);
         bones[i].rotation.z = parseFloat(inputRz[i].value);
       }
-
+    
       // Apply bone transformations to the skinned mesh before exporting
       scene.traverse(function (object) {
         if (!object.isSkinnedMesh) return;
-
+    
         var positionAttribute = object.geometry.getAttribute('position');
         var normalAttribute = object.geometry.getAttribute('normal');
         var v1 = new Vector3();
-
+    
         for (var j = 0; j < positionAttribute.count; j++) {
           object.boneTransform(j, v1);
           positionAttribute.setXYZ(j, v1.x, v1.y, v1.z);
-          /*  getBoneNormalTransform.call(object, j, v1); */
+         /*  getBoneNormalTransform.call(object, j, v1); */
           normalAttribute.setXYZ(j, v1.x, v1.y, v1.z);
         }
-
+    
         positionAttribute.needsUpdate = true;
         normalAttribute.needsUpdate = true;
       });
-
+    
       // Create a new OBJExporter
       var exporter = new OBJExporter();
-
+    
       // Export the updated scene
       const result = exporter.parse(scene);
       const blob = new Blob([result], { type: "text/plain" });
@@ -268,6 +280,9 @@ class World {
       link.download = "exported_model.obj";
       link.click();
     });
+    
+    
+
   }
 
   render() {
