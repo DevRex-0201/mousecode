@@ -309,13 +309,6 @@ class World {
         var normalAttribute = object.geometry.getAttribute('normal');
         var v1 = new Vector3();
     
-        for (var j = 0; j < positionAttribute.count; j++) {
-          object.boneTransform(j, v1);
-          positionAttribute.setXYZ(j, v1.x, v1.y, v1.z);
-         /*  getBoneNormalTransform.call(object, j, v1); */
-          normalAttribute.setXYZ(j, v1.x, v1.y, v1.z);
-        }
-    
         positionAttribute.needsUpdate = true;
         normalAttribute.needsUpdate = true;
       });
