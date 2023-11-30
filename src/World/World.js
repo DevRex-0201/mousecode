@@ -65,11 +65,34 @@ let bonenames = [
   "r_metatarsus01_jj_0125"
 ]
 
+let shapeNames = [
+  "MouseLiver_back",
+  "MouseHeart_squash",
+  "MouseHeart_back",
+  "Gland1_long_scale",
+  "Gland1_wide_scale",
+  "Gland1_left_bend",
+  "Gland1_right_bend",
+  "Gland2_long_scale",
+  "Gland2_wide_scale",
+  "Gland2_left_bend",
+  "Gland2_right_bend",  
+]
+
+let shapeClassNames = [
+  "inputLiver",
+  "inputHeart",
+  "inputGland1",
+  "inputGland2"
+]
+
 let camera;
 let controls;
 let renderer;
 let scene;
 let loop;
+let blends = [];
+let blend_models = [];
 let bones = [];
 let tem_bones = [];
 let rotations = [];
@@ -80,6 +103,7 @@ let inputz;
 let inputRx;
 let inputRy;
 let inputRz;
+let inputBlendShapes
 
 
 class World {
@@ -146,100 +170,137 @@ class World {
 
       return `<div class="joint-card">
           <div class="joint-title">${bone.name}</div>
+          
           <div class="joint-input">
-              <div class="label" for="">PX</div>
-              <input class="joint-input-X" type="number" step="0.05" placeholder="" value=0>
-          </div>
-          <div class="joint-input">
-              <div class="label" for="">PY</div>
-              <input class="joint-input-Y" type="number" step="0.05" placeholder="" value=0>
-          </div>
-          <div class="joint-input">
-              <div class="label" for="">PZ</div>
-              <input class="joint-input-Z" type="number" step="0.05" placeholder="" value=0>
-          </div>
-          <div class="joint-input">
-              <div class="label" for="">RX</div>
+              <div class="label" for="">X</div>
               <input class="joint-input-RX" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
-              <div class="label" for="">RY</div>
+              <div class="label" for="">Y</div>
               <input class="joint-input-RY" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
-              <div class="label" for="">RZ</div>
+              <div class="label" for="">Z</div>
               <input class="joint-input-RZ" type="number" step="0.05" placeholder="" value=0>
           </div>
       </div>`
     }).join(" "));
 
+    let shapeIndex = 0;
+    let content = "";
+
     for (let i = 0; i < blend_meshes.length; i++) {
-      let blend_model = scene.getObjectByName(blend_meshes[i]);
-      let blend = Object.keys(blend_model.morphTargetDictionary);
-      for (let j = 0; j < blend.length; j++) {
-        blend_shapes.push({ mesh_name: blend_meshes[i], blend_value: blend_model.morphTargetInfluences[j], index: j });
-      }
+      blend_models.push(scene.getObjectByName(blend_meshes[i]));
+      blends.push(scene.getObjectByName(blend_meshes[i]).morphTargetDictionary);
+
+      for (let j = 0; j < blends.length; j++) {
+        content += `
+        <div class="blend-shape" style="height: auto; position: relative; display: flex; align-items: center; margin-bottom: 15px; color: white;">
+            <label style="font-size: 24px; margin-right: 20px;">${shapeNames[shapeIndex]}</label> 
+            <input class="${shapeClassNames[i]}" style="width: 100%; width: 150px; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" step="0.05" type="number" placeholder="" value=0>
+        </div>
+      `
+      shapeIndex ++
+      } 
+    }
+    document.getElementById("slider-container").innerHTML = content;
+    
+    let inputLiver = document.getElementsByClassName("inputLiver");
+    let inputHeart = document.getElementsByClassName("inputHeart");
+    let inputGland1 = document.getElementsByClassName("inputGland1");
+    let inputGland2 = document.getElementsByClassName("inputGland2");
+
+    for (let i = 0; i < inputLiver.length; i++) {
+      inputLiver[i].addEventListener("change", () => {
+        blend_models[0].morphTargetInfluences[i] = parseFloat(Number(inputLiver[i].value));       
+      })
+    }
+
+    
+    for (let i = 0; i < inputHeart.length; i++) {
+      inputHeart[i].addEventListener("change", () => {
+        blend_models[1].morphTargetInfluences[i] = parseFloat(Number(inputHeart[i].value));
+      })
+    }
+
+    for (let i = 0; i < inputGland1.length; i++) {
+      inputGland1[i].addEventListener("change", () => {
+        blend_models[2].morphTargetInfluences[i] = parseFloat(Number(inputGland1[i].value));    
+      })
+    }
+
+    for (let i = 0; i < inputGland2.length; i++) {
+      inputGland2[i].addEventListener("change", () => {
+        blend_models[3].morphTargetInfluences[i] = parseFloat(Number(inputGland2[i].value));       
+      })
     }
 
 
-
-    document.getElementById("slider-container").innerHTML = (blend_shapes.map((blend) => (
+/*     document.getElementById("slider-container").innerHTML = (blend_shapes.map((blend) => (
       `
         <div class="blend-shape" style="height: auto; position: relative; display: flex; align-items: center; margin-bottom: 15px; color: white;">
             <label style="font-size: 24px; margin-right: 20px;">${blend.mesh_name}</label> 
-            <input style="width: 100%; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" type="number" />
+            <input class="input-blend-shape" style="width: 100%; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" step="0.05" type="number" placeholder="" value=0>
         </div>
       `
-    )).join(" "))
-
-    inputx = document.getElementsByClassName("joint-input-X");
-    inputy = document.getElementsByClassName("joint-input-Y");
-    inputz = document.getElementsByClassName("joint-input-Z");
+    )).join(" ")) */
+    
+    inputBlendShapes= document.getElementsByClassName("input-blend-shape");
+    // inputx = document.getElementsByClassName("joint-input-X");
+    // inputy = document.getElementsByClassName("joint-input-Y");
+    // inputz = document.getElementsByClassName("joint-input-Z");
     inputRx = document.getElementsByClassName("joint-input-RX");
     inputRy = document.getElementsByClassName("joint-input-RY");
     inputRz = document.getElementsByClassName("joint-input-RZ");
-    
-    let inputLen = inputx.length;
+
+    let blendLen = inputBlendShapes.length;
+    for (let i = 0; i < blendLen; i++) {
+      inputBlendShapes[i].addEventListener("change", () => {
+        blend_shapes[i].blend_value = parseFloat(inputBlendShapes[i].value);             
+      })
+    }
+
+    let inputLen = inputRx.length;
     for (let i = 0; i < inputLen; i++) {
-      inputx[i].addEventListener("change", () => {
-        bones[i].position.setX(parseFloat(bones[i].position.x + (inputx[i].value - positions[i].x)));
-        positions[i].x = inputx[i].value;        
-        bones[i].position.needsUpdate = true;
-      })
+      // inputx[i].addEventListener("change", () => {
+      //   bones[i].position.setX(parseFloat(bones[i].position.x + (Number(inputx[i].value) - positions[i].x)));
+      //   positions[i].x = Number(inputx[i].value);        
+      //   bones[i].position.needsUpdate = true;
+      // })
 
-      inputy[i].addEventListener("change", () => {
-        bones[i].position.setY(parseFloat(bones[i].position.y + (inputy[i].value - positions[i].y)));
-        positions[i].y = inputy[i].value;        
-        bones[i].position.needsUpdate = true;
-      })
+      // inputy[i].addEventListener("change", () => {
+      //   bones[i].position.setY(parseFloat(bones[i].position.y + Number((inputy[i].value) - positions[i].y)));
+      //   positions[i].y = Number(inputy[i].value);        
+      //   bones[i].position.needsUpdate = true;
+      // })
 
-      inputz[i].addEventListener("change", () => {
-        bones[i].position.setZ(parseFloat(bones[i].position.z + (inputz[i].value - positions[i].z)));
-        positions[i].z = inputz[i].value;        
-        bones[i].position.needsUpdate = true;
-      })
+      // inputz[i].addEventListener("change", () => {
+      //   bones[i].position.setZ(parseFloat(bones[i].position.z + (Number(inputz[i].value) - positions[i].z)));
+      //   positions[i].z = Number(inputz[i].value);        
+      //   bones[i].position.needsUpdate = true;
+      // })
       inputRx[i].addEventListener("change", () => {
-        bones[i].rotation.x = parseFloat(parseFloat(bones[i].rotation.x + (inputRx[i].value - rotations[i].x)));
-        rotations[i].x = inputRx[i].value;
+        bones[i].rotation.x = parseFloat(parseFloat(bones[i].rotation.x + (Number(inputRx[i].value) - rotations[i].x)));
+        rotations[i].x = Number(inputRx[i].value);
         bones[i].rotation.needsUpdate = true;
       })
 
       inputRy[i].addEventListener("change", () => {
-        bones[i].rotation.y = parseFloat(parseFloat(bones[i].rotation.y + (inputRy[i].value - rotations[i].y)));
-        rotations[i].y = inputRy[i].value;
+        bones[i].rotation.y = parseFloat(parseFloat(bones[i].rotation.y + (Number(inputRy[i].value) - rotations[i].y)));
+        rotations[i].y = Number(inputRy[i].value);
         bones[i].rotation.needsUpdate = true;
       })
 
       inputRz[i].addEventListener("change", () => {
-        bones[i].rotation.z = parseFloat(parseFloat(bones[i].rotation.z + (inputRz[i].value - rotations[i].z)));
-        rotations[i].z = inputRz[i].value;
+        bones[i].rotation.z = parseFloat(parseFloat(bones[i].rotation.z + (Number(inputRz[i].value) - rotations[i].z)));
+        rotations[i].z = Number(inputRz[i].value);
         bones[i].rotation.needsUpdate = true;
       })
     }
 
 
 
-    document.getElementById("export-btn").addEventListener("click", function () {  
+    document.getElementById("export-btn").addEventListener("click", function () {
       // Apply bone transformations to the skinned mesh before exporting
       scene.traverse(function (object) {
         if (!object.isSkinnedMesh) return;
