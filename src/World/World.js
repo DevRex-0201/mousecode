@@ -62,7 +62,11 @@ let bonenames = [
   "l_femur01_jj_0100",
   "l_metatarsus01_jj_0101",
   "r_femur01_jj_0123",
-  "r_metatarsus01_jj_0125"
+  "r_metatarsus01_jj_0125",
+  "l_ulna01_jj_045",
+  "r_ulna01_jj_068",
+  "l_tibia01_jj_00",
+  "r_tibia01_jj_0124"
 ]
 
 let shapeNames = [
@@ -76,7 +80,7 @@ let shapeNames = [
   "Gland2_long_scale",
   "Gland2_wide_scale",
   "Gland2_left_bend",
-  "Gland2_right_bend",  
+  "Gland2_right_bend",
 ]
 
 let shapeClassNames = [
@@ -105,6 +109,11 @@ let inputRy;
 let inputRz;
 let inputBlendShapes
 
+function numberSlice(number) {
+  // Using toFixed to round to two decimal places
+  var truncatedNumber = Number(number.toFixed(3));
+  return truncatedNumber;
+}
 
 class World {
   constructor(container) {
@@ -123,7 +132,7 @@ class World {
 
   async init() {
 
-    const { modelData } = await loadModel('/assets/models/scene.gltf');
+    const { modelData } = await loadModel('/final/assets/models/scene.gltf');
 
     const material = new MeshBasicMaterial({
       color: 0xff0000
@@ -162,25 +171,35 @@ class World {
       }
     }
 
-  /*   console.log("first")
-    console.log(bones) */
+    
     document.getElementById("joint-container").innerHTML = (bones.map((bone, index) => {
-      positions.push({x: 0, y: 0, z: 0});
-      rotations.push({x: 0, y: 0, z: 0});
+      positions.push({ x: 0, y: 0, z: 0 });
+      rotations.push({ x: 0, y: 0, z: 0 });
 
       return `<div class="joint-card">
           <div class="joint-title">${bone.name}</div>
-          
           <div class="joint-input">
-              <div class="label" for="">X</div>
+              <div class="label" for="">PX</div>
+              <input class="joint-input-X" type="number" step="0.05" placeholder="" value=0>
+          </div>
+          <div class="joint-input">
+              <div class="label" for="">PY</div>
+              <input class="joint-input-Y" type="number" step="0.05" placeholder="" value=0>
+          </div>
+          <div class="joint-input">
+              <div class="label" for="">PZ</div>
+              <input class="joint-input-Z" type="number" step="0.05" placeholder="" value=0>
+          </div>
+          <div class="joint-input">
+              <div class="label" for="">RX</div>
               <input class="joint-input-RX" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
-              <div class="label" for="">Y</div>
+              <div class="label" for="">RY</div>
               <input class="joint-input-RY" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
-              <div class="label" for="">Z</div>
+              <div class="label" for="">RZ</div>
               <input class="joint-input-RZ" type="number" step="0.05" placeholder="" value=0>
           </div>
       </div>`
@@ -190,6 +209,7 @@ class World {
     let content = "";
 
     for (let i = 0; i < blend_meshes.length; i++) {
+      console.log(scene.getObjectByName(blend_meshes[i]));
       blend_models.push(scene.getObjectByName(blend_meshes[i]));
       blends.push(scene.getObjectByName(blend_meshes[i]).morphTargetDictionary);
 
@@ -200,11 +220,13 @@ class World {
             <input class="${shapeClassNames[i]}" style="width: 100%; width: 150px; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" step="0.05" type="number" placeholder="" value=0>
         </div>
       `
-      shapeIndex ++
-      } 
+        shapeIndex++
+      }
     }
-    document.getElementById("slider-container").innerHTML = content;
+
     
+    document.getElementById("slider-container").innerHTML = content;
+
     let inputLiver = document.getElementsByClassName("inputLiver");
     let inputHeart = document.getElementsByClassName("inputHeart");
     let inputGland1 = document.getElementsByClassName("inputGland1");
@@ -212,73 +234,59 @@ class World {
 
     for (let i = 0; i < inputLiver.length; i++) {
       inputLiver[i].addEventListener("change", () => {
-        blend_models[0].morphTargetInfluences[i] = parseFloat(Number(inputLiver[i].value));       
+        blend_models[0].morphTargetInfluences[i] = parseFloat(Number(inputLiver[i].value));
+        blend_models[0].morphTargetInfluences.needsUpdate = true;
       })
     }
 
-    
     for (let i = 0; i < inputHeart.length; i++) {
       inputHeart[i].addEventListener("change", () => {
         blend_models[1].morphTargetInfluences[i] = parseFloat(Number(inputHeart[i].value));
+        blend_models[0].morphTargetInfluences.needsUpdate = true;
       })
     }
 
     for (let i = 0; i < inputGland1.length; i++) {
       inputGland1[i].addEventListener("change", () => {
-        blend_models[2].morphTargetInfluences[i] = parseFloat(Number(inputGland1[i].value));    
+        blend_models[2].morphTargetInfluences[i] = parseFloat(Number(inputGland1[i].value));
+        blend_models[0].morphTargetInfluences.needsUpdate = true;
       })
     }
 
     for (let i = 0; i < inputGland2.length; i++) {
       inputGland2[i].addEventListener("change", () => {
-        blend_models[3].morphTargetInfluences[i] = parseFloat(Number(inputGland2[i].value));       
+        blend_models[3].morphTargetInfluences[i] = parseFloat(Number(inputGland2[i].value));
+        blend_models[0].morphTargetInfluences.needsUpdate = true;
       })
     }
 
-
-/*     document.getElementById("slider-container").innerHTML = (blend_shapes.map((blend) => (
-      `
-        <div class="blend-shape" style="height: auto; position: relative; display: flex; align-items: center; margin-bottom: 15px; color: white;">
-            <label style="font-size: 24px; margin-right: 20px;">${blend.mesh_name}</label> 
-            <input class="input-blend-shape" style="width: 100%; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" step="0.05" type="number" placeholder="" value=0>
-        </div>
-      `
-    )).join(" ")) */
-    
-    inputBlendShapes= document.getElementsByClassName("input-blend-shape");
-    // inputx = document.getElementsByClassName("joint-input-X");
-    // inputy = document.getElementsByClassName("joint-input-Y");
-    // inputz = document.getElementsByClassName("joint-input-Z");
+    inputBlendShapes = document.getElementsByClassName("input-blend-shape");
+    inputx = document.getElementsByClassName("joint-input-X");
+    inputy = document.getElementsByClassName("joint-input-Y");
+    inputz = document.getElementsByClassName("joint-input-Z");
     inputRx = document.getElementsByClassName("joint-input-RX");
     inputRy = document.getElementsByClassName("joint-input-RY");
     inputRz = document.getElementsByClassName("joint-input-RZ");
 
-    let blendLen = inputBlendShapes.length;
-    for (let i = 0; i < blendLen; i++) {
-      inputBlendShapes[i].addEventListener("change", () => {
-        blend_shapes[i].blend_value = parseFloat(inputBlendShapes[i].value);             
-      })
-    }
-
     let inputLen = inputRx.length;
     for (let i = 0; i < inputLen; i++) {
-      // inputx[i].addEventListener("change", () => {
-      //   bones[i].position.setX(parseFloat(bones[i].position.x + (Number(inputx[i].value) - positions[i].x)));
-      //   positions[i].x = Number(inputx[i].value);        
-      //   bones[i].position.needsUpdate = true;
-      // })
+      inputx[i].addEventListener("change", () => {
+        bones[i].position.setX(parseFloat(bones[i].position.x + (Number(inputx[i].value) - positions[i].x)));
+        positions[i].x = Number(inputx[i].value);        
+        bones[i].position.needsUpdate = true;
+      })
 
-      // inputy[i].addEventListener("change", () => {
-      //   bones[i].position.setY(parseFloat(bones[i].position.y + Number((inputy[i].value) - positions[i].y)));
-      //   positions[i].y = Number(inputy[i].value);        
-      //   bones[i].position.needsUpdate = true;
-      // })
+      inputy[i].addEventListener("change", () => {
+        bones[i].position.setY(parseFloat(bones[i].position.y + Number((inputy[i].value) - positions[i].y)));
+        positions[i].y = Number(inputy[i].value);        
+        bones[i].position.needsUpdate = true;
+      })
 
-      // inputz[i].addEventListener("change", () => {
-      //   bones[i].position.setZ(parseFloat(bones[i].position.z + (Number(inputz[i].value) - positions[i].z)));
-      //   positions[i].z = Number(inputz[i].value);        
-      //   bones[i].position.needsUpdate = true;
-      // })
+      inputz[i].addEventListener("change", () => {
+        bones[i].position.setZ(parseFloat(bones[i].position.z + (Number(inputz[i].value) - positions[i].z)));
+        positions[i].z = Number(inputz[i].value);        
+        bones[i].position.needsUpdate = true;
+      })
       inputRx[i].addEventListener("change", () => {
         bones[i].rotation.x = parseFloat(parseFloat(bones[i].rotation.x + (Number(inputRx[i].value) - rotations[i].x)));
         rotations[i].x = Number(inputRx[i].value);
@@ -298,24 +306,88 @@ class World {
       })
     }
 
+/*     for (let i = 0; i <= bones.length - 1; i++) {
+      console.log(bones[i].name)
+      console.log("PX:" + numberSlice(bones[i].position.x));
+      console.log("PY:" + numberSlice(bones[i].position.y));
+      console.log("PZ:" + numberSlice(bones[i].position.z));
+      console.log("RX:" + numberSlice(bones[i].rotation.x));
+      console.log("RY:" + numberSlice(bones[i].rotation.y));
+      console.log("RZ:" + numberSlice(bones[i].rotation.z));
+      console.log("\n")
+    } */
+
+    const getBoneNormalTransform = (function () {
+      const baseNormal = new Vector3();
+      const skinIndex = new Vector4();
+      const skinWeight = new Vector4();
+      const vector = new Vector3();
+      const matrix = new Matrix4();
+      const matrix3 = new Matrix3();
+
+      return function (index, target) {
+        const skeleton = this.skeleton;
+        const geometry = this.geometry;
+
+        skinIndex.fromBufferAttribute(geometry.attributes.skinIndex, index);
+        skinWeight.fromBufferAttribute(geometry.attributes.skinWeight, index);
+
+        baseNormal.fromBufferAttribute(geometry.attributes.normal, index).applyNormalMatrix(matrix3.getNormalMatrix(this.bindMatrix));
+
+        target.set(0, 0, 0);
+
+        for (let i = 0; i < 4; i++) {
+          const weight = skinWeight.getComponent(i);
+
+          if (weight !== 0) {
+            const boneIndex = skinIndex.getComponent(i);
+
+            matrix.multiplyMatrices(skeleton.bones[boneIndex].matrixWorld, skeleton.boneInverses[boneIndex]);
+
+            target.addScaledVector(
+              vector.copy(baseNormal).applyNormalMatrix(matrix3.getNormalMatrix(matrix)),
+              weight
+            );
+          }
+        }
+
+        matrix3.getNormalMatrix(this.bindMatrixInverse);
+        return target.applyNormalMatrix(matrix3);
+      };
+    })();
+
 
 
     document.getElementById("export-btn").addEventListener("click", function () {
       // Apply bone transformations to the skinned mesh before exporting
       scene.traverse(function (object) {
         if (!object.isSkinnedMesh) return;
-    
-        var positionAttribute = object.geometry.getAttribute('position');
-        var normalAttribute = object.geometry.getAttribute('normal');
+        if (object.geometry.isBufferGeometry !== true) throw new error('only buffergeometry supported.');
+
+        var positionattribute = object.geometry.getAttribute('position');
+        var normalattribute = object.geometry.getAttribute('normal');
         var v1 = new Vector3();
-    
-        positionAttribute.needsUpdate = true;
-        normalAttribute.needsUpdate = true;
+        for (var j = 0; j < positionattribute.count; j++) {
+          object.boneTransform(j, v1);
+          positionattribute.setXYZ(j, v1.x, v1.y, v1.z);
+
+          // getBoneNormalTransform.call(object, j, v1);
+          normalattribute.setXYZ(j, v1.x, v1.y, v1.z);
+        }
+
+        positionattribute.needsupdate = true;
+        normalattribute.needsupdate = true;
+
+        // object.skeleton.bones.forEach(bone => bone.rotation.set(0, 0, 0));
       });
-    
+
+
+
+
+
       // Create a new OBJExporter
       var exporter = new OBJExporter();
-    
+
       // Export the updated scene
       const result = exporter.parse(scene);
       const blob = new Blob([result], { type: "text/plain" });
@@ -324,8 +396,8 @@ class World {
       link.download = "exported_model.obj";
       link.click();
     });
-    
-    
+
+
 
   }
 
