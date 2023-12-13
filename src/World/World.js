@@ -107,12 +107,64 @@ let inputz;
 let inputRx;
 let inputRy;
 let inputRz;
+let inputMeshes;
 let inputBlendShapes
 
 function numberSlice(number) {
   // Using toFixed to round to two decimal places
   var truncatedNumber = Number(number.toFixed(3));
   return truncatedNumber;
+}
+
+function importCsv() {
+  const input = document.getElementById('csvInput');
+  const file = input.files[0];
+  let event = new Event('change');
+  let meshParams = [];
+  let shapeParams = [];
+
+  if (file) {
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const csvContent = e.target.result;
+      const data = parseCSV(csvContent);
+      // Use the parsed data as needed
+      for(let i = 1; i <= 55; i++) {
+        let row = data[i].split(",");
+        for(let j = 1; j <= 6; j++) {
+          meshParams.push(Number(row[j]));
+        }
+      }
+
+      for(let k = 56; k <= 66; k++) {
+        let row = data[k].split(",");
+        shapeParams.push(Number(row[1]));
+      }
+      
+      for(let j = 0; j <= meshParams.length - 1; j ++) {
+        inputMeshes[j].value = Number(meshParams[j]);
+        inputMeshes[j].dispatchEvent(event);
+      }
+      
+      for(let l = 0; l <= shapeParams.length - 1; l ++) {
+        inputBlendShapes[l].value = Number(shapeParams[l]);
+        inputBlendShapes[l].dispatchEvent(event);
+      }
+
+    };
+
+    reader.readAsText(file);
+  } else {
+    console.error('No file selected.');
+  }
+}
+
+function parseCSV(csv) {
+  // Your CSV parsing logic here
+  const rows = csv.split('\n');
+  const result = rows;
+  return result;
 }
 
 class World {
@@ -132,7 +184,7 @@ class World {
 
   async init() {
 
-    const { modelData } = await loadModel('/assets/models/scene.gltf');
+    const { modelData } = await loadModel('/final/assets/models/scene.gltf');
 
     const material = new MeshBasicMaterial({
       color: 0xff0000
@@ -171,60 +223,60 @@ class World {
       }
     }
 
-    
+
     document.getElementById("joint-container").innerHTML = (bones.map((bone, index) => {
       positions.push({ x: 0, y: 0, z: 0 });
       rotations.push({ x: 0, y: 0, z: 0 });
+      // parameters.push({px: bone.position.x, py: bone.position.y, pz: bone.position.z, rx: bone.rotation.x, ry: bone.rotation.y, rz: bone.rotation.z})
 
       return `<div class="joint-card">
           <div class="joint-title">${bone.name}</div>
           <div class="joint-input">
               <div class="label" for="">PX</div>
-              <input class="joint-input-X" type="number" step="0.05" placeholder="" value=0>
+              <input class="joint-input-X input-mesh" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">PY</div>
-              <input class="joint-input-Y" type="number" step="0.05" placeholder="" value=0>
+              <input class="joint-input-Y input-mesh" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">PZ</div>
-              <input class="joint-input-Z" type="number" step="0.05" placeholder="" value=0>
+              <input class="joint-input-Z input-mesh" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">RX</div>
-              <input class="joint-input-RX" type="number" step="0.05" placeholder="" value=0>
+              <input class="joint-input-RX input-mesh" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">RY</div>
-              <input class="joint-input-RY" type="number" step="0.05" placeholder="" value=0>
+              <input class="joint-input-RY input-mesh" type="number" step="0.05" placeholder="" value=0>
           </div>
           <div class="joint-input">
               <div class="label" for="">RZ</div>
-              <input class="joint-input-RZ" type="number" step="0.05" placeholder="" value=0>
+              <input class="joint-input-RZ input-mesh" type="number" step="0.05" placeholder="" value=0>
           </div>
       </div>`
     }).join(" "));
+
+    // console.log(parameters)
 
     let shapeIndex = 0;
     let content = "";
 
     for (let i = 0; i < blend_meshes.length; i++) {
-      console.log(scene.getObjectByName(blend_meshes[i]));
       blend_models.push(scene.getObjectByName(blend_meshes[i]));
       blends.push(scene.getObjectByName(blend_meshes[i]).morphTargetDictionary);
 
-      for (let j = 0; j < blends.length; j++) {
+      for (let j = 0; j < Object.keys(blends[i]).length; j++) {
         content += `
         <div class="blend-shape" style="height: auto; position: relative; display: flex; align-items: center; margin-bottom: 15px; color: white;">
             <label style="font-size: 24px; margin-right: 20px;">${shapeNames[shapeIndex]}</label> 
-            <input class="${shapeClassNames[i]}" style="width: 100%; width: 150px; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" step="0.05" type="number" placeholder="" value=0>
+            <input class="${shapeClassNames[i]} input-blend-shape" style="width: 100%; width: 150px; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" step="0.05" type="number" placeholder="" min=-10 max=10 value=0>
         </div>
       `
         shapeIndex++
       }
     }
-
-    
     document.getElementById("slider-container").innerHTML = content;
 
     let inputLiver = document.getElementsByClassName("inputLiver");
@@ -267,24 +319,26 @@ class World {
     inputRx = document.getElementsByClassName("joint-input-RX");
     inputRy = document.getElementsByClassName("joint-input-RY");
     inputRz = document.getElementsByClassName("joint-input-RZ");
+    inputMeshes = document.getElementsByClassName("input-mesh");
+
 
     let inputLen = inputRx.length;
     for (let i = 0; i < inputLen; i++) {
       inputx[i].addEventListener("change", () => {
         bones[i].position.setX(parseFloat(bones[i].position.x + (Number(inputx[i].value) - positions[i].x)));
-        positions[i].x = Number(inputx[i].value);        
+        positions[i].x = Number(inputx[i].value);
         bones[i].position.needsUpdate = true;
       })
 
       inputy[i].addEventListener("change", () => {
         bones[i].position.setY(parseFloat(bones[i].position.y + Number((inputy[i].value) - positions[i].y)));
-        positions[i].y = Number(inputy[i].value);        
+        positions[i].y = Number(inputy[i].value);
         bones[i].position.needsUpdate = true;
       })
 
       inputz[i].addEventListener("change", () => {
         bones[i].position.setZ(parseFloat(bones[i].position.z + (Number(inputz[i].value) - positions[i].z)));
-        positions[i].z = Number(inputz[i].value);        
+        positions[i].z = Number(inputz[i].value);
         bones[i].position.needsUpdate = true;
       })
       inputRx[i].addEventListener("change", () => {
@@ -306,17 +360,19 @@ class World {
       })
     }
 
-/*     for (let i = 0; i <= bones.length - 1; i++) {
-      console.log(bones[i].name)
-      console.log("PX:" + numberSlice(bones[i].position.x));
-      console.log("PY:" + numberSlice(bones[i].position.y));
-      console.log("PZ:" + numberSlice(bones[i].position.z));
-      console.log("RX:" + numberSlice(bones[i].rotation.x));
-      console.log("RY:" + numberSlice(bones[i].rotation.y));
-      console.log("RZ:" + numberSlice(bones[i].rotation.z));
-      console.log("\n")
-    } */
-
+    /*     for (let i = 0; i <= bones.length - 1; i++) {
+          console.log(bones[i].name)
+          console.log("PX:" + numberSlice(bones[i].position.x));
+          console.log("PY:" + numberSlice(bones[i].position.y));
+          console.log("PZ:" + numberSlice(bones[i].position.z));
+          console.log("RX:" + numberSlice(bones[i].rotation.x));
+          console.log("RY:" + numberSlice(bones[i].rotation.y));
+          console.log("RZ:" + numberSlice(bones[i].rotation.z));
+          console.log("\n")
+        } */
+        // inputx[0].value = 50;
+        // inputx[1].value = 50;
+        
     const getBoneNormalTransform = (function () {
       const baseNormal = new Vector3();
       const skinIndex = new Vector4();
@@ -375,15 +431,11 @@ class World {
           normalattribute.setXYZ(j, v1.x, v1.y, v1.z);
         }
 
-        positionattribute.needsupdate = true;
-        normalattribute.needsupdate = true;
+        // positionattribute.needsupdate = true;
+        // normalattribute.needsupdate = true;
 
         // object.skeleton.bones.forEach(bone => bone.rotation.set(0, 0, 0));
       });
-
-
-
-
 
       // Create a new OBJExporter
       var exporter = new OBJExporter();
@@ -397,8 +449,12 @@ class World {
       link.click();
     });
 
-
-
+    document.getElementById("csvInput").addEventListener("change", function () {
+      importCsv();
+      console.log(inputMeshes.length)
+      for (let i = 0; i <= meshParams.length - 1; i ++) {
+      }
+    });
   }
 
   render() {
