@@ -6,6 +6,7 @@ import { createControls } from './systems/controls.js';
 import { createRenderer } from './systems/renderer.js';
 import { Resizer } from './systems/Resizer.js';
 import { Loop } from './systems/Loop.js';
+import { parameters } from './Parameters.js';
 import { Scene, BackSide, SkeletonHelper, MeshBasicMaterial, Group, SkinnedMesh, Skeleton, Vector3, Vector4, Matrix4, Matrix3 } from 'https://cdn.skypack.dev/three@v0.132.2';
 import { OBJExporter } from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/OBJExporter.js';
 import { GLTFExporter } from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/GLTFExporter.js';
@@ -184,7 +185,7 @@ class World {
 
   async init() {
 
-    const { modelData } = await loadModel('/assets/models/scene.gltf');
+    const { modelData } = await loadModel('/final/assets/models/scene.gltf');
 
     const material = new MeshBasicMaterial({
       color: 0xff0000
@@ -449,11 +450,12 @@ class World {
       link.click();
     });
 
+    document.getElementById("import-btn").addEventListener("click", function () {
+      document.getElementById("csvInput").click();
+    });
+
     document.getElementById("csvInput").addEventListener("change", function () {
       importCsv();
-      console.log(inputMeshes.length)
-      for (let i = 0; i <= meshParams.length - 1; i ++) {
-      }
     });
   }
 
