@@ -6,7 +6,6 @@ import { createControls } from './systems/controls.js';
 import { createRenderer } from './systems/renderer.js';
 import { Resizer } from './systems/Resizer.js';
 import { Loop } from './systems/Loop.js';
-import { parameters } from './Parameters.js';
 import { Scene, BackSide, SkeletonHelper, MeshBasicMaterial, Group, SkinnedMesh, Skeleton, Vector3, Vector4, Matrix4, Matrix3 } from 'https://cdn.skypack.dev/three@v0.132.2';
 import { OBJExporter } from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/OBJExporter.js';
 import { GLTFExporter } from 'https://cdn.skypack.dev/three@v0.132.2/examples/jsm/exporters/GLTFExporter.js';
