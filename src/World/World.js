@@ -157,7 +157,6 @@ let loop;
 let blends = [];
 let blend_models = [];
 let bones = [];
-let tem_bones = [];
 let rotations = [];
 let positions = [];
 let inputx;
