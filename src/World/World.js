@@ -70,18 +70,76 @@ let bonenames = [
   "r_tibia01_jj_0124"
 ]
 
+let jointNames = {
+  c_pelvis01_jj_01: "Pelvis",
+  c_tail03_jj_03: "Tail-03",
+  c_tail04_jj_04: "Tail-04",
+  c_tail05_jj_05: "Tail-05",
+  c_tail06_jj_06: "Tail-06",
+  c_tail07_jj_07: "Tail-07",
+  c_tail08_jj_08: "Tail-08",
+  c_tail09_jj_09: "Tail-09",
+  c_tail10_jj_010: "Tail-10",
+  c_tail11_jj_011: "Tail-11",
+  c_tail12_jj_012: "Tail-12",
+  c_tail13_jj_013: "Tail-13",
+  c_tail14_jj_014: "Tail-14",
+  c_tail15_jj_015: "Tail-15",
+  c_tail16_jj_016: "Tail-16",
+  c_tail17_jj_017: "Tail-17",
+  c_tail18_jj_018: "Tail-18",
+  c_tail19_jj_019: "Tail-19",
+  c_tail20_jj_020: "Tail-20",
+  c_tail21_jj_021: "Tail-21",
+  c_tail22_jj_022: "Tail-22",
+  c_tail23_jj_023: "Tail-23",
+  c_spine01_jj_024: "Spine-01",
+  c_spine02_jj_025: "Spine-02",
+  c_spine03_jj_026: "Spine-03",
+  c_spine04_jj_027: "Spine-04",
+  c_spine05_jj_028: "Spine-05",
+  c_neck01_jj_029: "Neck",
+  c_head01_jj_030: "Head",
+  l_ear01_jj_033: "L-Ear",
+  r_ear01_jj_036: "R-Ear",
+  l_eye01_jj_039: "L-Eye",
+  r_eye01_jj_040: "R-Eye",
+  organ_protect_1_L_041: "Organ-Protect-L",
+  organ_protect_1_R_042: "Organ-Protect-R",
+  l_scapula01_jj_043: "L-Scapula",
+  l_humerus01_jj_044: "L-Humerus",
+  l_ulna01_jj_045: "L-Ulna",
+  l_metacarpus01_jj_046: "L-Metacarpus",
+  r_scapula01_jj_066: "R-Scapula",
+  r_humerus01_jj_067: "R-Humerus",
+  r_ulna01_jj_068: "R-Ulna01",
+  r_metacarpus01_jj_069: "R-Metacarpus",
+  organ_protect_B_L_089: "Organ-Protect-B-L",
+  organ_protect_B_R_091: "R-Organ-Protect-B",
+  organ_protect_2_094: "Organ-Protect-2",
+  organ_protect_L_096: "Organ-Protect-L",
+  organ_protect_S_097: "Organ-Protect-S",
+  organ_protect_L_2_099: "Organ-Protect-L-2",
+  l_femur01_jj_0100: "L-Femur",
+  l_tibia01_jj_00: "L-Tibia",
+  l_metatarsus01_jj_0101: "L-Metatarsus",
+  r_femur01_jj_0123: "R-Femur",
+  r_tibia01_jj_0124: "R-Tibia",
+  r_metatarsus01_jj_0125: "R-Metatarsus"
+}
+
 let shapeNames = [
-  "MouseLiver_back",
-  "MouseHeart_squash",
-  "MouseHeart_back",
-  "Gland1_long_scale",
-  "Gland1_wide_scale",
-  "Gland1_left_bend",
-  "Gland1_right_bend",
-  "Gland2_long_scale",
-  "Gland2_wide_scale",
-  "Gland2_left_bend",
-  "Gland2_right_bend",
+  "MouseLiver-Back",
+  "MouseHeart-Squash",
+  "MouseHeart-Back",
+  "Gland1-Long-Scale",
+  "Gland1-Wide-Scale",
+  "Gland1-Left-Bend",
+  "Gland1-Right-Bend",
+  "Gland2-Long-Scale",
+  "Gland2-Wide-Scale",
+  "Gland2-Left-Bend",
+  "Gland2-Right-Bend",
 ]
 
 let shapeClassNames = [
@@ -185,7 +243,7 @@ class World {
 
   async init() {
 
-    const { modelData } = await loadModel('/final/assets/models/scene.gltf');
+    const { modelData } = await loadModel('/assets/models/scene.gltf');
 
     const material = new MeshBasicMaterial({
       color: 0xff0000
@@ -231,7 +289,7 @@ class World {
       // parameters.push({px: bone.position.x, py: bone.position.y, pz: bone.position.z, rx: bone.rotation.x, ry: bone.rotation.y, rz: bone.rotation.z})
 
       return `<div class="joint-card">
-          <div class="joint-title">${bone.name}</div>
+          <div class="joint-title">${jointNames[bone.name]}</div>
           <div class="joint-input">
               <div class="label" for="">PX</div>
               <input class="joint-input-X input-mesh" type="number" step="0.05" placeholder="" value=0>
