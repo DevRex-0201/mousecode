@@ -156,8 +156,10 @@ let loop;
 let blends = [];
 let blend_models = [];
 let bones = [];
+let tem_bones = [];
 let rotations = [];
 let positions = [];
+let initialRotations = [];
 let inputx;
 let inputy;
 let inputz;
@@ -187,24 +189,24 @@ function importCsv() {
       const csvContent = e.target.result;
       const data = parseCSV(csvContent);
       // Use the parsed data as needed
-      for(let i = 1; i <= 55; i++) {
+      for (let i = 1; i <= 55; i++) {
         let row = data[i].split(",");
-        for(let j = 1; j <= 6; j++) {
+        for (let j = 1; j <= 6; j++) {
           meshParams.push(Number(row[j]));
         }
       }
 
-      for(let k = 56; k <= 66; k++) {
+      for (let k = 56; k <= 66; k++) {
         let row = data[k].split(",");
         shapeParams.push(Number(row[1]));
       }
-      
-      for(let j = 0; j <= meshParams.length - 1; j ++) {
+
+      for (let j = 0; j <= meshParams.length - 1; j++) {
         inputMeshes[j].value = Number(meshParams[j]);
         inputMeshes[j].dispatchEvent(event);
       }
-      
-      for(let l = 0; l <= shapeParams.length - 1; l ++) {
+
+      for (let l = 0; l <= shapeParams.length - 1; l++) {
         inputBlendShapes[l].value = Number(shapeParams[l]);
         inputBlendShapes[l].dispatchEvent(event);
       }
@@ -270,7 +272,12 @@ class World {
     })
     boneStructure = scene.getObjectByProperty('type', "Bone");
     boneStructure.traverse((child) => {
-      bonestemp.push(child)
+      bonestemp.push(child);
+      initialRotations.push({
+        x: child.rotation.x,
+        y: child.rotation.y,
+        z: child.rotation.z,
+      });
     });
 
     for (let i = 0; i < bonestemp.length; i++) {
@@ -327,8 +334,8 @@ class World {
       for (let j = 0; j < Object.keys(blends[i]).length; j++) {
         content += `
         <div class="blend-shape" style="height: auto; position: relative; display: flex; align-items: center; margin-bottom: 15px; color: white;">
-            <label style="font-size: 24px; margin-right: 20px;">${shapeNames[shapeIndex]}</label> 
-            <input class="${shapeClassNames[i]} input-blend-shape" style="width: 100%; width: 150px; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 20px; padding: 4px 10px;" step="0.05" type="number" placeholder="" min=-10 max=10 value=0>
+            <label style="font-size: 20px; margin-right: 10px;">${shapeNames[shapeIndex]}</label> 
+            <input class="${shapeClassNames[i]} input-blend-shape" style="width: 100%; width: 150px; position: relative; border-radius: 10px; background-color: darkgray; border: none; outline: none; color: white; font-size: 18px; padding: 4px 10px; margin-right: 20px;" step="0.05" type="number" placeholder="" min=-10 max=10 value=0>
         </div>
       `
         shapeIndex++
@@ -427,9 +434,9 @@ class World {
           console.log("RZ:" + numberSlice(bones[i].rotation.z));
           console.log("\n")
         } */
-        // inputx[0].value = 50;
-        // inputx[1].value = 50;
-        
+    // inputx[0].value = 50;
+    // inputx[1].value = 50;
+
     const getBoneNormalTransform = (function () {
       const baseNormal = new Vector3();
       const skinIndex = new Vector4();
@@ -488,10 +495,11 @@ class World {
           normalattribute.setXYZ(j, v1.x, v1.y, v1.z);
         }
 
-        // positionattribute.needsupdate = true;
-        // normalattribute.needsupdate = true;
-
-        // object.skeleton.bones.forEach(bone => bone.rotation.set(0, 0, 0));
+        // Reset bone rotations to zero
+        // object.skeleton.bones.forEach((bone, index) => {
+        //   const initialRotation = initialRotations[index];
+        //   bone.rotation.set(initialRotation.x, initialRotation.y, initialRotation.z);
+        // });
       });
 
       // Create a new OBJExporter
@@ -504,6 +512,16 @@ class World {
       link.href = URL.createObjectURL(blob);
       link.download = "exported_model.obj";
       link.click();
+
+      
+
+      // scene.traverse(function (object) {
+      //   if (!object.isSkinnedMesh) return;
+      //   object.skeleton.bones.forEach((bone, index) => {
+      //     const initialRotation = initialRotations[index];
+      //     bone.rotation.set(initialRotation.x, initialRotation.y, initialRotation.z);
+      //   });
+      // });
     });
 
     document.getElementById("import-btn").addEventListener("click", function () {
