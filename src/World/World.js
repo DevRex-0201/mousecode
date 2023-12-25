@@ -160,6 +160,8 @@ let tem_bones = [];
 let rotations = [];
 let positions = [];
 let initialRotations = [];
+let initialJointTransforms = {};
+let currentJointTransforms = {};
 let inputx;
 let inputy;
 let inputz;
@@ -277,7 +279,18 @@ class World {
         x: child.rotation.x,
         y: child.rotation.y,
         z: child.rotation.z,
+        name: child.name
       });
+      if (child.isBone) {
+        initialJointTransforms[child.name] = {
+          x: child.rotation.x,
+          y: child.rotation.y,
+          z: child.rotation.z,
+          px: child.position.x,
+          py: child.position.y,
+          pz: child.position.z,
+        };
+      }
     });
 
     for (let i = 0; i < bonestemp.length; i++) {
@@ -424,83 +437,88 @@ class World {
       })
     }
 
-    /*     for (let i = 0; i <= bones.length - 1; i++) {
-          console.log(bones[i].name)
-          console.log("PX:" + numberSlice(bones[i].position.x));
-          console.log("PY:" + numberSlice(bones[i].position.y));
-          console.log("PZ:" + numberSlice(bones[i].position.z));
-          console.log("RX:" + numberSlice(bones[i].rotation.x));
-          console.log("RY:" + numberSlice(bones[i].rotation.y));
-          console.log("RZ:" + numberSlice(bones[i].rotation.z));
-          console.log("\n")
-        } */
-    // inputx[0].value = 50;
-    // inputx[1].value = 50;
+    function getBoneNormalTransform() {
 
-    const getBoneNormalTransform = (function () {
-      const baseNormal = new Vector3();
-      const skinIndex = new Vector4();
-      const skinWeight = new Vector4();
-      const vector = new Vector3();
-      const matrix = new Matrix4();
-      const matrix3 = new Matrix3();
+      var basenormal = new Vector3();
+
+      var skinindex = new Vector4();
+      var skinweight = new Vector4();
+
+      var vector = new Vector3();
+      var matrix = new Matrix4();
+      var matrix3 = new Matrix3();
 
       return function (index, target) {
-        const skeleton = this.skeleton;
-        const geometry = this.geometry;
 
-        skinIndex.fromBufferAttribute(geometry.attributes.skinIndex, index);
-        skinWeight.fromBufferAttribute(geometry.attributes.skinWeight, index);
+        var skeleton = this.skeleton;
+        var geometry = this.geometry;
 
-        baseNormal.fromBufferAttribute(geometry.attributes.normal, index).applyNormalMatrix(matrix3.getNormalMatrix(this.bindMatrix));
+        skinindex.fromBufferAttribute(geometry.attributes.skinindex, index);
+        skinweight.fromBufferAttribute(geometry.attributes.skinweight, index);
+
+        basenormal.fromBufferAttribute(geometry.attributes.normal, index).applyNormalMatrix(matrix3.applyNormalMatrix(this.bindmatrix));
 
         target.set(0, 0, 0);
 
-        for (let i = 0; i < 4; i++) {
-          const weight = skinWeight.getComponent(i);
+        for (var i = 0; i < 4; i++) {
+
+          var weight = skinweight.getComponent(i);
 
           if (weight !== 0) {
-            const boneIndex = skinIndex.getComponent(i);
 
-            matrix.multiplyMatrices(skeleton.bones[boneIndex].matrixWorld, skeleton.boneInverses[boneIndex]);
+            var boneindex = skinindex.getComponent(i);
 
-            target.addScaledVector(
-              vector.copy(baseNormal).applyNormalMatrix(matrix3.getNormalMatrix(matrix)),
-              weight
-            );
+            matrix.multiplyMatrices(skeleton.bones[boneindex].matrixworld, skeleton.boneinverses[boneindex]);
+
+            target.addScaledVector(vector.copy(basenormal).applyNormalMatrix(matrix3.applyNormalMatrix(matrix)), weight);
+
           }
+
         }
-
-        matrix3.getNormalMatrix(this.bindMatrixInverse);
+        matrix3.applyNormalMatrix(this.bindMatrixInverse);
         return target.applyNormalMatrix(matrix3);
+
       };
-    })();
 
-
+    }
 
     document.getElementById("export-btn").addEventListener("click", function () {
-      // Apply bone transformations to the skinned mesh before exporting
       scene.traverse(function (object) {
         if (!object.isSkinnedMesh) return;
         if (object.geometry.isBufferGeometry !== true) throw new error('only buffergeometry supported.');
+        object.skeleton.bones.forEach(bone => {
+
+          let filtered = initialRotations.filter(rot => {
+            return rot.name == bone.name
+          })
+          if (filtered.length > 0) {
+            bone.rotation.x = filtered[0].x;
+            bone.rotation.y = filtered[0].y;
+            bone.rotation.z = filtered[0].z;
+            // bone.rotation.set(0,0,0)
+          }
+          else {
+
+            bone.rotation.set(0, 0, 0)
+          }
+        });
 
         var positionattribute = object.geometry.getAttribute('position');
         var normalattribute = object.geometry.getAttribute('normal');
         var v1 = new Vector3();
         for (var j = 0; j < positionattribute.count; j++) {
           object.boneTransform(j, v1);
+          // object.getVertexPosition(j, v1);
           positionattribute.setXYZ(j, v1.x, v1.y, v1.z);
-
-          // getBoneNormalTransform.call(object, j, v1);
+          getBoneNormalTransform.call(object, j, v1);
           normalattribute.setXYZ(j, v1.x, v1.y, v1.z);
         }
+        positionattribute.needsUpdate = true;
+        normalattribute.needsUpdate = true;
 
-        // Reset bone rotations to zero
-        // object.skeleton.bones.forEach((bone, index) => {
-        //   const initialRotation = initialRotations[index];
-        //   bone.rotation.set(initialRotation.x, initialRotation.y, initialRotation.z);
-        // });
       });
+
+      // Apply bone transformations to the skinned mesh before exporting
 
       // Create a new OBJExporter
       var exporter = new OBJExporter();
@@ -513,15 +531,42 @@ class World {
       link.download = "exported_model.obj";
       link.click();
 
-      
 
-      // scene.traverse(function (object) {
-      //   if (!object.isSkinnedMesh) return;
-      //   object.skeleton.bones.forEach((bone, index) => {
-      //     const initialRotation = initialRotations[index];
-      //     bone.rotation.set(initialRotation.x, initialRotation.y, initialRotation.z);
-      //   });
-      // });
+      scene.traverse(function (object) {
+        if (!object.isSkinnedMesh) return;
+        if (object.geometry.isBufferGeometry !== true) throw new error('only buffergeometry supported.');
+        object.skeleton.bones.forEach(bone => {
+
+          let filtered = initialRotations.filter(rot => {
+            return rot.name == bone.name
+          })
+          if (filtered.length > 0) {
+            bone.rotation.x = filtered[0].x;
+            bone.rotation.y = filtered[0].y;
+            bone.rotation.z = filtered[0].z;
+            // bone.rotation.set(0,0,0)
+          }
+          else {
+
+            bone.rotation.set(0, 0, 0)
+          }
+        });
+
+        var positionattribute = object.geometry.getAttribute('position');
+        var normalattribute = object.geometry.getAttribute('normal');
+        var v1 = new Vector3();
+        for (var j = 0; j < positionattribute.count; j++) {
+          object.boneTransform(j, v1);
+          // object.getVertexPosition(j, v1);
+          positionattribute.setXYZ(j, v1.x, v1.y, v1.z);
+          getBoneNormalTransform.call(object, j, v1);
+          normalattribute.setXYZ(j, v1.x, v1.y, v1.z);
+        }
+        positionattribute.needsUpdate = true;
+        normalattribute.needsUpdate = true;
+
+      });
+
     });
 
     document.getElementById("import-btn").addEventListener("click", function () {
