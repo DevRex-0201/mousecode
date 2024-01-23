@@ -76,6 +76,7 @@ select {
     }
 
     .wrapper>.result-container {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -125,6 +126,7 @@ select {
 }
 
 .wrapper>.result-container {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -237,6 +239,7 @@ select {
     }
 
     .wrapper>.result-container {
+        position: relative;
         width: 100%;
     }
 
@@ -255,6 +258,41 @@ select {
     font-size: 18px;
     border-radius: 10px;
     /* display: none; */
+}
+
+.btn-import {
+    position: absolute;
+    top: 25px;
+    left: 150px;
+    padding: 10px 20px;
+    color: black;
+    font-weight: 800;
+    font-size: 18px;
+    border-radius: 10px;
+    /* display: none; */
+}
+
+.csvInput {
+    position: absolute;
+    top: 25px;
+    left: 150px;
+    padding: 10px 20px;
+    color: white;
+    font-weight: 800;
+    font-size: 18px;
+    border-radius: 10px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    display: none;
+}
+
+.btn-container {
+    padding-right: 50px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    
 }
 
 .button-wrapper {
